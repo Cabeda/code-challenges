@@ -8,8 +8,10 @@ class Solution:
         maxLength = 0
 
         for i in range(len(s)):
-            letters = set()
-            for j in range(i, len(s)):
+            letters = set(s[i : i + maxLength])
+            if len(s) - i < maxLength:
+                break
+            for j in range(i + maxLength, len(s)):
                 if s[j] in letters:
                     if len(letters) > maxLength:
                         maxLength = len(letters)
