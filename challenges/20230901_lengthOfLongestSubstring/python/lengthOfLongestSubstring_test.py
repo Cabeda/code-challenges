@@ -4,6 +4,8 @@ sol = Solution()
 
 
 def test_string():
+    assert sol.lengthOfLongestSubstring("qrsvbspk") == 5
+    assert sol.lengthOfLongestSubstring("pwwkew") == 3
     assert sol.lengthOfLongestSubstring("abcabcbb") == 3
     assert sol.lengthOfLongestSubstring("abcabcbb") == 3
     assert sol.lengthOfLongestSubstring(" ") == 1
