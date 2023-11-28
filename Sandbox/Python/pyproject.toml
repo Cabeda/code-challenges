@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "python"
+version = "0.1.0"
+description = ""
+authors = ["José Cabeda <jose.cabeda@fidel.uk>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+ipykernel = "^6.21.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
