@@ -43,9 +43,6 @@ class Challenge_9:
             after_values.append(after)
         return sum(prev_values), sum(after_values)
 
-    def challenge_2(self) -> int:
-        return 0
-
 
 if __name__ == "__main__":
     challenge = Challenge_9()
