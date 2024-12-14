@@ -1,0 +1,28 @@
+[project]
+name = "glue"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aws-glue-sessions>=1.0.7",
+    "boto3>=1.35.39",
+    "duckdb-extension-aws>=1.1.0",
+    "duckdb-extension-httpfs>=1.1.0",
+    "duckdb-extension-parquet>=1.1.0",
+    "duckdb-extensions>=1.1.0",
+    "duckdb>=1.1.0",
+    "faker>=28.4.1",
+    "fastparquet>=2024.5.0",
+    "jupyter-lsp>=2.2.5",
+    "jupyter>=1.1.1",
+    "jupyterlab-lsp>=5.1.0",
+    "numpy>=2.1.1",
+    "pandas>=2.2.2",
+    "pyarrow>=17.0.0",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "ipykernel>=6.29.5",
+]

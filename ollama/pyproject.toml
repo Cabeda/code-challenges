@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "ollama-rag"
+version = "0.1.0"
+description = ""
+authors = ["José Cabeda <jecabeda@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+ollama = "^0.1.8"
+chromadb = "^0.4.24"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
