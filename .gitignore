@@ -8,3 +8,4 @@ AdventOfCode/**/input.txt
 .venv
 .DS_Store
 Glue/data_2GB.parquet
+.env
