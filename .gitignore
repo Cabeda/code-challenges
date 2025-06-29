@@ -9,3 +9,4 @@ AdventOfCode/**/input.txt
 .DS_Store
 Glue/data_2GB.parquet
 .env
+excel-summarizer/*.xlsx
