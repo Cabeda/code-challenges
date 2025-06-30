@@ -1,5 +1,6 @@
 import pandas as pd
 import ollama
+import datetime
 
 
 def create_summary(row):
@@ -94,7 +95,7 @@ def create_ai_summary(row):
         
         Focus on the key aspects: study details, treatment information, and adverse effects.
 
-        The text should start with "${row.get("Author", "Unknown Author")}" et al. ${row.get("Ano", "Unknown Year")} (${row.get("Tipo de estudo", "Unknown Type")}) and be readable in a paper format."
+        The text should start with "{row.get("Autor", "Unknown Author")}" et al. {row.get("Ano", "Unknown Year")} ({row.get("Tipo de estudo", "Unknown Type")}) and be readable in a paper format."
         """
 
         # Generate AI summary using Ollama
@@ -119,7 +120,7 @@ def create_ai_summary(row):
 def main():
     """Main function to process the Excel file and create summaries."""
     input_file = "conflitos.xlsx"
-    output_file = "conflitos_with_summaries.xlsx"
+    output_file = f"conflitos_with_summaries_{datetime.datetime.today().strftime('%Y_%m_%d')}.xlsx"
     sheet_name = "Tabela de extração"
 
     try:
