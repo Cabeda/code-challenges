@@ -1,0 +1,1 @@
+Use uv package manager to install the required packages for the project.

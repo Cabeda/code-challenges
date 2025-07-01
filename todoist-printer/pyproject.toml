@@ -1,0 +1,25 @@
+[project]
+name = "todoist-printer"
+version = "0.1.0"
+description = "A Python app that retrieves today's tasks from Todoist and prints them on a thermal printer"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "todoist-api-python>=3.1.0,<4",
+    "python-escpos>=3.1",
+    "pillow>=10.0.0",
+    "python-dotenv>=1.0.0",
+    "click>=8.1.0",
+    "rich>=13.0.0",
+    "pyusb>=1.3.1",
+]
+
+[project.scripts]
+todoist-printer = "main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
