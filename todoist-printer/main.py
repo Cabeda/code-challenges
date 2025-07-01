@@ -221,15 +221,73 @@ class ThermalPrinter:
             console.print(f"[red]Error initializing printer: {e}[/red]")
             self.printer = None
     
-    def print_tasks(self, tasks: List[dict], projects: dict):
+    def print_tasks(self, tasks: List[dict], projects: dict, print_mode: str = "separate"):
         """Print tasks to thermal printer."""
         if not self.printer:
             console.print("[yellow]No printer available, falling back to console output[/yellow]")
-            self._print_to_console(tasks, projects)
+            self._print_to_console(tasks, projects, print_mode)
             return
         
-        console.print(f"[blue]Printing {len(tasks)} tasks to {self.printer_type} printer...[/blue]")
+        console.print(f"[blue]Printing {len(tasks)} tasks to {self.printer_type} printer in {print_mode} mode...[/blue]")
         
+        if print_mode == "separate":
+            self._print_separate_tasks(tasks, projects)
+        else:
+            self._print_grouped_tasks(tasks, projects)
+    
+    def _print_separate_tasks(self, tasks: List[dict], projects: dict):
+        """Print each task as a separate ticket."""
+        try:
+            for i, task in enumerate(tasks, 1):
+                # Header for each ticket
+                self.printer.set(align='center', bold=True)
+                self.printer.text("TASK TICKET\n")
+                self.printer.text("=" * 12 + "\n")
+                
+                # Task number and project
+                project_name = projects.get(task.project_id, "Unknown Project")
+                self.printer.set(align='center')
+                self.printer.text(f"#{i} | {project_name}\n")
+                self.printer.text("-" * 20 + "\n")
+                
+                # Task content
+                self.printer.set(align='left', bold=True)
+                self.printer.text(f"{task.content}\n")
+                
+                # Priority
+                if task.priority > 1:
+                    priority_map = {2: "Low", 3: "Medium", 4: "HIGH"}
+                    priority_text = priority_map.get(task.priority, 'Normal')
+                    self.printer.text(f"Priority: {priority_text}\n")
+                
+                # Labels
+                if task.labels:
+                    labels_str = ", ".join(task.labels)
+                    self.printer.text(f"Labels: {labels_str}\n")
+                
+                # Completion checkbox
+                self.printer.text("\n")
+                self.printer.set(align='center')
+                self.printer.text("[ ] COMPLETED\n")
+                
+                # Footer
+                self.printer.text("=" * 20 + "\n")
+                
+                # Cut paper between tickets (if supported)
+                try:
+                    self.printer.cut()
+                except:
+                    # If cut is not supported, add extra spacing
+                    self.printer.text("\n\n")
+            
+            console.print("[green]Individual task tickets successfully printed![/green]")
+            
+        except Exception as e:
+            console.print(f"[red]Error printing separate tasks: {e}[/red]")
+            self._print_to_console(tasks, projects, "separate")
+    
+    def _print_grouped_tasks(self, tasks: List[dict], projects: dict):
+        """Print all tasks together in grouped format (original behavior)."""
         try:
             # Header
             self.printer.set(align='center', bold=True, double_width=True, double_height=True)
@@ -295,11 +353,64 @@ class ThermalPrinter:
             console.print("[green]Tasks successfully printed to thermal printer![/green]")
             
         except Exception as e:
-            console.print(f"[red]Error printing: {e}[/red]")
-            self._print_to_console(tasks, projects)
+            console.print(f"[red]Error printing grouped tasks: {e}[/red]")
+            self._print_to_console(tasks, projects, "grouped")
     
-    def _print_to_console(self, tasks: List[dict], projects: dict):
+    def _print_to_console(self, tasks: List[dict], projects: dict, print_mode: str = "separate"):
         """Fallback: print tasks to console with rich formatting."""
+        if print_mode == "separate":
+            self._print_separate_to_console(tasks, projects)
+        else:
+            self._print_grouped_to_console(tasks, projects)
+    
+    def _print_separate_to_console(self, tasks: List[dict], projects: dict):
+        """Print individual task tickets to console."""
+        console.print(Panel.fit(
+            "[bold blue]INDIVIDUAL TASK TICKETS[/bold blue]",
+            border_style="blue"
+        ))
+        
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+        console.print(f"[dim]Generated: {current_time}[/dim]\n")
+        
+        if not tasks:
+            console.print(Panel(
+                "[green]No tasks for today!\nGreat job! 🎉[/green]",
+                title="Status",
+                border_style="green"
+            ))
+            return
+        
+        for i, task in enumerate(tasks, 1):
+            project_name = projects.get(task.project_id, "Unknown Project")
+            
+            # Create ticket content
+            ticket_content = []
+            ticket_content.append(f"[bold]{task.content}[/bold]")
+            
+            # Priority
+            if task.priority > 1:
+                priority_map = {2: "Low", 3: "Medium", 4: "[red]HIGH[/red]"}
+                priority_text = priority_map.get(task.priority, "Normal")
+                ticket_content.append(f"Priority: {priority_text}")
+            
+            # Labels
+            if task.labels:
+                labels_text = ", ".join(task.labels)
+                ticket_content.append(f"Labels: {labels_text}")
+        
+            
+            # Create individual ticket panel
+            console.print(Panel(
+                "\n".join(ticket_content),
+                title=f"Task #{i} | {project_name}",
+                border_style="cyan",
+                width=50
+            ))
+            console.print()  # Add spacing between tickets
+    
+    def _print_grouped_to_console(self, tasks: List[dict], projects: dict):
+        """Print grouped tasks to console (original behavior)."""
         console.print(Panel.fit(
             "[bold blue]TODAY'S TASKS[/bold blue]",
             border_style="blue"
@@ -378,9 +489,12 @@ class ThermalPrinter:
               help='Printer configuration (format: key=value,key=value)')
 @click.option('--output-file', envvar='OUTPUT_FILE', default='todoist_tasks.txt',
               help='Output file for file printer type (or set OUTPUT_FILE environment variable)')
+@click.option('--print-mode', envvar='PRINT_MODE', default='separate', 
+              type=click.Choice(['separate', 'grouped']),
+              help='Print mode: separate (individual tickets) or grouped (all tasks together) - default is separate')
 @click.option('--list-usb-printers', 'list_usb_printers_flag', is_flag=True,
               help='List available USB printers and exit')
-def main(token: str, printer_type: str, printer_config: str, output_file: str, list_usb_printers_flag: bool):
+def main(token: str, printer_type: str, printer_config: str, output_file: str, print_mode: str, list_usb_printers_flag: bool):
     """
     Todoist Thermal Printer - Retrieve today's tasks and print them.
     
@@ -466,7 +580,7 @@ def main(token: str, printer_type: str, printer_config: str, output_file: str, l
     
     # Initialize printer and print tasks
     printer = ThermalPrinter(printer_type, **printer_kwargs)
-    printer.print_tasks(tasks, projects)
+    printer.print_tasks(tasks, projects, print_mode)
 
 
 if __name__ == "__main__":

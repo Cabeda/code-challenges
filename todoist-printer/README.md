@@ -6,6 +6,9 @@ A Python application that retrieves today's tasks from Todoist and prints them o
 
 - 🔗 **Todoist Integration**: Uses the official Todoist API to fetch tasks
 - 📅 **Today's Tasks**: Automatically filters for today's tasks and overdue items
+- 🎫 **Two Print Modes**: 
+  - **Separate Mode** (Default): Each task prints as an individual ticket that can be cut and placed on a board
+  - **Grouped Mode**: All tasks printed together in a single document
 - 🖨️ **Multiple Printer Support**: USB, Serial, Network, and file output
 - 📊 **Rich Console Display**: Beautiful table format when printer is not available
 - 🏷️ **Project Organization**: Groups tasks by project for better organization
@@ -49,31 +52,57 @@ TODOIST_API_TOKEN=your_api_token_here
 ## Usage
 
 ### Basic Usage (Console Output)
+
+#### Separate Tickets Mode (Default)
 ```bash
-python main.py
+uv run python main.py
+```
+
+#### Grouped Tasks Mode
+```bash
+uv run python main.py --print-mode grouped
 ```
 
 ### Thermal Printer Usage
 
-#### USB Printer
+#### USB Printer (Separate Tickets)
 ```bash
-python main.py --printer-type usb --printer-config "vendor_id=0x04b8,product_id=0x0202"
+uv run python main.py --printer-type usb --printer-config "vendor_id=0x04b8,product_id=0x0202"
+```
+
+#### USB Printer (Grouped Tasks)
+```bash
+uv run python main.py --printer-type usb --printer-config "vendor_id=0x04b8,product_id=0x0202" --print-mode grouped
 ```
 
 #### Serial Printer
 ```bash
-python main.py --printer-type serial --printer-config "port=/dev/ttyUSB0,baudrate=9600"
+uv run python main.py --printer-type serial --printer-config "port=/dev/ttyUSB0,baudrate=9600"
 ```
 
 #### Network Printer
 ```bash
-python main.py --printer-type network --printer-config "host=192.168.1.100,port=9100"
+uv run python main.py --printer-type network --printer-config "host=192.168.1.100,port=9100"
 ```
 
 #### File Output
 ```bash
-python main.py --printer-type file --output-file tasks.txt
+uv run python main.py --printer-type file --output-file tasks.txt
 ```
+
+## Print Modes
+
+### Separate Tickets Mode (Default)
+- Each task is printed as an individual ticket
+- Perfect for cutting and placing on a kanban board or task board
+- Includes task details, priority, due date, and a completion checkbox
+- Automatically cuts paper between tickets (if supported by printer)
+
+### Grouped Tasks Mode
+- All tasks are printed together in a single document
+- Tasks are grouped by project
+- More compact format for overview purposes
+- Traditional single-document output
 
 ### Environment Variables
 
@@ -81,7 +110,10 @@ You can also set configuration via environment variables:
 
 ```bash
 export TODOIST_API_TOKEN="your_token_here"
-python main.py
+export PRINT_MODE="separate"  # or "grouped"
+export PRINTER_TYPE="file"
+export OUTPUT_FILE="my_tasks.txt"
+uv run python main.py
 ```
 
 ## Printer Setup
@@ -138,21 +170,17 @@ Generated: 2024-01-15 08:30
 WORK
 ----
 1. Finish quarterly report
-   Due: 2024-01-15 at 09:00
    Priority: HIGH
    Labels: urgent
 
 2. Team meeting preparation
-   Due: 2024-01-15
 
 PERSONAL
 --------
 1. Buy groceries
-   Due: 2024-01-15
    Labels: shopping
 
 2. Call dentist
-   Due: 2024-01-14 (OVERDUE)
    Priority: Medium
    Labels: health
 

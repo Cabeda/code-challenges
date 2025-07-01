@@ -22,6 +22,18 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
             }
+        },
+        {
+            "name": "Python Debugger: uv run main.py (grouped mode)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uv",
+            "args": ["run", "python", "main.py", "--print-mode", "grouped"],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
         }
     ]
 }
