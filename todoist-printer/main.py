@@ -240,7 +240,7 @@ class ThermalPrinter:
         try:
             for i, task in enumerate(tasks, 1):
                 # Header for each ticket
-                self.printer.set(align='center', bold=True)
+                self.printer.set(align='center', bold=True, normal_textsize=True)
                 self.printer.text("TASK TICKET\n")
                 self.printer.text("=" * 12 + "\n")
                 
@@ -248,7 +248,7 @@ class ThermalPrinter:
                 project_name = projects.get(task.project_id, "Unknown Project")
                 self.printer.set(align='center')
                 self.printer.text(f"#{i} | {project_name}\n")
-                self.printer.text("-" * 20 + "\n")
+                self.printer.text("-" * 16 + "\n")
                 
                 # Task content
                 self.printer.set(align='left', bold=True)
@@ -265,13 +265,8 @@ class ThermalPrinter:
                     labels_str = ", ".join(task.labels)
                     self.printer.text(f"Labels: {labels_str}\n")
                 
-                # Completion checkbox
-                self.printer.text("\n")
-                self.printer.set(align='center')
-                self.printer.text("[ ] COMPLETED\n")
-                
                 # Footer
-                self.printer.text("=" * 20 + "\n")
+                self.printer.text("=" * 16 + "\n")
                 
                 # Cut paper between tickets (if supported)
                 try:
