@@ -1,49 +1,14 @@
 import pandas as pd
 import ollama
 import datetime
+import swifter
 
 
 def create_summary(row):
     """Create a summary text for each row based on available information, excluding specified columns."""
-    # Columns to exclude from summary
-    excluded_columns = {
-        "Título",
-        "País",
-        "DOI",
-        "Idade média",
-        "Faixa etária",
-        "Sexo",
-        "IMC (baixo peso, peso normal, excesso de peso, obesidade)",
-        "Álcool",
-        "Tabaco",
-        "Comorbilidades relevantes",
-        "Outros fármacos (concomitant medication use)",
-        "Adesão à tx (padrão de adesão à tx)",
-    }
-
-    # Create a structured summary from remaining columns
-    summary_parts = []
-
-    for column_name, value in row.items():
-        # Skip excluded columns and empty values
-        if (
-            column_name in excluded_columns
-            or pd.isna(value)
-            or str(value).strip() == ""
-        ):
-            continue
-
-        # Format the column-value pair
-        clean_value = str(value).strip()
-        if clean_value and clean_value.lower() not in ["nan", "none", "null"]:
-            summary_parts.append(f"{column_name}: {clean_value}")
 
     # Join all parts with "; "
-    summary = "; ".join(summary_parts)
-
-    # If no meaningful information is available, provide a default summary
-    if not summary_parts:
-        summary = "Incomplete record with missing information"
+    summary = f"{row.get("Autor", "Unknown Author")} ({row.get("Ano", "Unknown Year")}) conducted a ({row.get("Tipo de estudo", "Unknown Type")}), in ({row.get("País", "Unknown Country")}), where they investigated the use of LZD in ({row.get("Número de participantes", "Unknown Nº")}) patients with ({row.get("Indicação para uso de LZD", "Unknown indication")}). The main outcomes on Lzd adverse effects were {row.get("Tipo de efeito", "Unknown AE")} with a frequency of {row.get("Frequência", "Unknown Frequency")}."
 
     return summary
 
@@ -54,7 +19,6 @@ def create_ai_summary(row):
         # Columns to exclude from summary
         excluded_columns = {
             "Título",
-            "País",
             "DOI",
             "Idade média",
             "Faixa etária",
@@ -92,15 +56,15 @@ def create_ai_summary(row):
         Please create a concise summary (maximum 2 sentences) for this research data record:
         
         {"; ".join(context)}
-        
-        Focus on the key aspects: study details, treatment information, and adverse effects.
 
-        The text should start with "{row.get("Autor", "Unknown Author")}" et al. {row.get("Ano", "Unknown Year")} ({row.get("Tipo de estudo", "Unknown Type")}) and be readable in a paper format."
+        The text should have the following structure:
+
+        {row.get("Autor", "Unknown Author")} ({row.get("Ano", "Unknown Year")}) conducted a ({row.get("Tipo de estudo", "Unknown Type")}), in ({row.get("País", "Unknown Country")}), where they investigated the use of LZD in ({row.get("Número de participantes", "Unknown Nº")}) patients with ({row.get("Indicação para uso de LZD", "Unknown indication")}). The main outcomes on Lzd adverse effects were {row.get("Tipo de efeito", "Unknown AE")} with a frequency of {row.get("Frequência", "Unknown Frequency")}.
         """
 
         # Generate AI summary using Ollama
         response = ollama.chat(
-            model="gemma3",
+            model="gemma3n",
             messages=[
                 {
                     "role": "user",
@@ -134,6 +98,8 @@ def main():
         df = df_raw.iloc[2:].copy()
         df.columns = headers
         df = df.reset_index(drop=True)
+        # Temporarily limit the number of rows for testing
+        # df = df.head(3)
 
         print(f"Loaded {len(df)} rows and {len(df.columns)} columns")
 
@@ -148,7 +114,9 @@ def main():
 
         print("\nCreating AI-generated summaries...")
         print("Using AI summaries...")
-        df["Summary_AI"] = df.apply(create_ai_summary, axis=1)
+        # df["Summary_AI"] = df.apply(create_ai_summary, axis=1)
+        df["Summary_AI"] = df.swifter.apply(create_ai_summary, axis=1)
+
 
         # Save to new Excel file
         print(f"\nSaving results to: {output_file}")
@@ -163,7 +131,7 @@ def main():
             row = df.iloc[i]
             print(f"Row {i + 1}:")
             print(f"  Original: {row.get('Title', 'N/A')}")
-            print(f"  Summary: {row['Summary']}")
+            print(f"  Summary: {row['Summary_AI']}")
             print()
 
     except FileNotFoundError:
